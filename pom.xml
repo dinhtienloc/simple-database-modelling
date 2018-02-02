@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>vn.locdt</groupId>
-    <artifactId>db-modeling</artifactId>
-    <name>db-modeling</name>
+    <artifactId>db-vn.locdt.modeling</artifactId>
+    <name>db-vn.locdt.modeling</name>
     <version>1.0.0</version>
 
     <properties>
@@ -15,8 +15,32 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.apache.ddlutils/ddlutils -->
+        <dependency>
+            <groupId>org.apache.ddlutils</groupId>
+            <artifactId>ddlutils</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.45</version>
+        </dependency>
+
+    </dependencies>
     <build>
-        <finalName>db-modeling</finalName>
+        <finalName>db-vn.locdt.modeling</finalName>
         <plugins>
 
             <!-- download source code in Eclipse, best practice -->
