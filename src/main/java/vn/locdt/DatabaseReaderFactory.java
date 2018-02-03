@@ -1,9 +1,9 @@
 package vn.locdt;
 
+import vn.locdt.db.system.mysql.MySQLResultSetExtractor;
 import vn.locdt.db.system.mysql.MySQLSystemModeling;
 import vn.locdt.db.system.SystemModeling;
 import vn.locdt.exception.SystemReaderNotFoundException;
-import vn.locdt.wrapper.DatabaseMetadataWrapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class DatabaseReaderFactory {
     private static Map<String, Callable<SystemModeling>> systems = new HashMap();
 
     static {
-        systems.put("MySQL", () -> new MySQLSystemModeling());
+        systems.put("MySQL", () -> new MySQLSystemModeling().addExtractor(new MySQLResultSetExtractor()));
     }
 
     public static SystemModeling createSystemReader(String databaseType, DatabaseMetadataWrapper wrapper) throws SystemReaderNotFoundException {

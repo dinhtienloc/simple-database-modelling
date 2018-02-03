@@ -1,14 +1,9 @@
-package vn.locdt.wrapper;
-
-import vn.locdt.util.Utils;
+package vn.locdt;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -17,16 +12,16 @@ import java.util.stream.StreamSupport;
 /**
  * Created by locdt on 2/2/2018.
  */
-public class ResultSetWrapper<T> implements Iterable<T>{
+public class ResultSetIterator<T> implements Iterable<T>{
     private final ResultSet rs;
     private final Function<ResultSet, T> onNextFnc;
 
-    public ResultSetWrapper(ResultSet rs){
+    public ResultSetIterator(ResultSet rs){
         this.rs = rs;
         this.onNextFnc = null;
     }
 
-    public ResultSetWrapper(ResultSet rs, Function<ResultSet, T> onNextFnc){
+    public ResultSetIterator(ResultSet rs, Function<ResultSet, T> onNextFnc){
         this.rs = rs;
         this.onNextFnc = onNextFnc;
     }
@@ -73,7 +68,7 @@ public class ResultSetWrapper<T> implements Iterable<T>{
         return StreamSupport.stream(this.spliterator(), false);
     }
 
-    public static ResultSetWrapper<ResultSet> wrap(ResultSet rs) {
-        return new ResultSetWrapper(rs);
+    public static ResultSetIterator<ResultSet> wrap(ResultSet rs) {
+        return new ResultSetIterator(rs);
     }
 }

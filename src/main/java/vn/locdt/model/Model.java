@@ -1,5 +1,7 @@
 package vn.locdt.model;
 
+import java.sql.ResultSet;
+
 /**
  * Created by locdt on 2/1/2018.
  */
