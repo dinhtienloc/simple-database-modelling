@@ -1,5 +1,7 @@
 package vn.locdt.util;
 
+import vn.locdt.exception.ThrowingConsumer;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.Consumer;
@@ -24,6 +26,16 @@ public class Utils {
                 } catch (ClassCastException ccEx) {
                     throw ex;
                 }
+            }
+        };
+    }
+
+    public static Consumer<ResultSet> wrapSqlCommand(ThrowingConsumer<ResultSet, SQLException> throwingConsumer) {
+        return i -> {
+            try {
+                throwingConsumer.accept(i);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
             }
         };
     }
