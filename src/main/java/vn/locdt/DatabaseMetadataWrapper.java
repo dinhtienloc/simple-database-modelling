@@ -77,7 +77,7 @@ public class DatabaseMetadataWrapper {
 
     private ResultSetIterator<ResultSet> createResultSetIterator(Callable<ResultSet> callable) {
         try {
-            new ResultSetIterator<>(callable.call());
+            return new ResultSetIterator(callable.call());
         }
         catch (SQLException e) {
             e.printStackTrace();

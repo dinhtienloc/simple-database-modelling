@@ -1,10 +1,16 @@
 package vn.locdt.util;
 
+import vn.locdt.exception.ThrowingCallable;
 import vn.locdt.exception.ThrowingConsumer;
+import vn.locdt.model.Catalog;
+import vn.locdt.model.Column;
+import vn.locdt.model.Table;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Created by locdt on 2/2/2018.
@@ -14,29 +20,22 @@ public class Utils {
         return str != null && str.length() > 0;
     }
 
-    public static <T, E extends Exception> Consumer<T> consumerWrapper(Consumer<T> c, Class<E> clazz) {
-        return i -> {
-            try {
-                c.accept(i);
-            } catch (Exception ex) {
-                try {
-                    E exCast = clazz.cast(ex);
-                    System.err.println(
-                            "Exception occured : " + exCast.getMessage());
-                } catch (ClassCastException ccEx) {
-                    throw ex;
-                }
-            }
-        };
+    public static Table findTableByName(Catalog catalog, String name) {
+        if (!Utils.isValidString(name)) return null;
+        for (Table table : catalog.getTables())
+            if (name.equals(table.getName())) return table;
+        return null;
     }
 
-    public static Consumer<ResultSet> wrapSqlCommand(ThrowingConsumer<ResultSet, SQLException> throwingConsumer) {
-        return i -> {
-            try {
-                throwingConsumer.accept(i);
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-        };
+    public static Column findColumnInTableByName(Catalog catalog, String tableName, String columnName) {
+        if (columnName == null || tableName == null) return null;
+        Table table = findTableByName(catalog, tableName);
+        if (table == null) return null;
+
+        for (Column col : table.getColumns()) {
+            if (columnName.equals(col.getName()))
+                return col;
+        }
+        return null;
     }
 }

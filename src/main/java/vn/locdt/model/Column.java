@@ -84,4 +84,20 @@ public class Column extends Model {
     public void setGenerated(boolean generated) {
         this.generated = generated;
     }
+
+    @Override
+    public String toString() {
+        return "Column{" +
+                "table=" + table.getName() +
+                ", name='" + name + '\'' +
+                ", dataTypeCode=" + dataTypeCode +
+                ", description='" + description + '\'' +
+                ", dataType='" + dataType + '\'' +
+                ", size=" + size +
+                ", primaryKey=" + primaryKey +
+                ", autoIncrement=" + autoIncrement +
+                ", generated=" + generated +
+                ", nullable=" + nullable +
+                '}';
+    }
 }

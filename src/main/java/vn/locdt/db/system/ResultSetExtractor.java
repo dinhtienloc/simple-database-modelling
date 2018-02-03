@@ -16,7 +16,7 @@ public abstract class ResultSetExtractor {
 
     public abstract Column column(ResultSet rs);
 
-    public abstract PrimaryKeyColumn primaryKey(ResultSet rs);
+    public abstract String primaryKey(ResultSet rs);
 
     public abstract ForeignKey foreignKey(ResultSet rs);
 }

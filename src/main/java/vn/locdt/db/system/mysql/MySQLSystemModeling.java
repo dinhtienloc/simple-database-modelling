@@ -2,15 +2,12 @@ package vn.locdt.db.system.mysql;
 
 import vn.locdt.db.system.ResultSetExtractor;
 import vn.locdt.db.system.SystemModeling;
-import vn.locdt.exception.SystemCatalogException;
-import vn.locdt.DatabaseMetadataWrapper;
-import vn.locdt.exception.CatalogNotSupportException;
 import vn.locdt.exception.SchemaNotSupportException;
 import vn.locdt.model.*;
-import vn.locdt.ResultSetIterator;
+import vn.locdt.util.SQL;
+import vn.locdt.util.Utils;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +21,7 @@ public class MySQLSystemModeling extends SystemModeling {
 
     public MySQLSystemModeling() {
         super();
+        this.extractor = new MySQLResultSetExtractor();
     }
 
     @Override
@@ -33,9 +31,9 @@ public class MySQLSystemModeling extends SystemModeling {
     }
 
     @Override
-    public List<Catalog> model() throws SystemCatalogException {
+    public List<Catalog> model() {
         List<Catalog> catalogs = new ArrayList<>();
-        try {
+        return SQL.wrap(() -> {
             ResultSet rs = wrapper.getMetaData().getCatalogs();
             while (rs.next()) {
                 String catalog = rs.getString("TABLE_CAT");
@@ -50,24 +48,25 @@ public class MySQLSystemModeling extends SystemModeling {
                     catalogs.add(modelCatalog(rs));
                 }
                 else {
-                    throw new SystemCatalogException("Could not model a system catalog.");
+                    System.out.println("Could not model a system catalog.");
                 }
             }
             return catalogs;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (CatalogNotSupportException e) {
-            e.printStackTrace();
-        }
-        return new ArrayList(){};
+        }, new ArrayList<>());
     }
 
     @Override
-    public Catalog modelCatalog(ResultSet rs) throws CatalogNotSupportException {
-        wrapper.setCatalog(catalog);
-        Catalog newCatalog = extractor.catalog(rs);
-        wrapper.getAllTables().forEach(row -> modelTable(newCatalog, row));
-        return newCatalog;
+    public Catalog modelCatalog(ResultSet rs) {
+        Catalog catalog = extractor.catalog(rs);
+        wrapper.setCatalog(catalog.getName());
+        wrapper.getAllTables().forEach(row -> modelTable(catalog, row));
+        catalog.getTables().forEach(
+            table -> wrapper.getForeignKeys(table.getName()).forEach(
+                row -> modelForeignKey(catalog, row)
+            )
+        );
+        System.out.println(">>>>>>>>>>>> Modeling catalog: " + catalog);
+        return catalog;
     }
 
     @Override
@@ -81,29 +80,46 @@ public class MySQLSystemModeling extends SystemModeling {
 
         wrapper.getAllColumns(table.getName()).forEach(row -> modelColumn(table, row));
         wrapper.getPrimaryKeys(table.getName()).forEach(row -> modelPrimaryKey(table, row));
-        wrapper.getForeignKeys(table.getName()).forEach(row -> modelForeignKey(table, row));
+
 
         catalog.addTable(table);
         table.setCatalog(catalog);
+        System.out.println(">>>> Modeling Table: " + table);
         return table;
     }
 
     @Override
     public Column modelColumn(Table table, ResultSet rs) {
-        Column newColumn = extractor.column(rs);
-        newColumn.setTable(table);
-        table.addColumn(newColumn);
-        return newColumn;
+        Column col = extractor.column(rs);
+        col.setTable(table);
+        table.addColumn(col);
+        System.out.println("> Modeling Column: " + col);
+        return col;
     }
 
     @Override
-    public PrimaryKeyColumn modelPrimaryKey(Table table, ResultSet pk) {
-        return null;
+    public void modelPrimaryKey(Table table, ResultSet rs) {
+        String pkName = extractor.primaryKey(rs);
+        table.getColumns().forEach(col -> {
+            if (col.getName().equals(pkName))
+                col.setPrimaryKey(true);
+        });
     }
 
     @Override
-    public ForeignKey modelForeignKey(Table table, ResultSet fkRs) {
-        return null;
+    public ForeignKey modelForeignKey(Catalog catalog, ResultSet rs) {
+        ForeignKey fk = extractor.foreignKey(rs);
+
+        Column pkColumn = Utils.findColumnInTableByName(catalog, fk.getReferencedTableName(), fk.getReferencedColumnName());
+        if (pkColumn == null) return null;
+
+        Column fkColumn = Utils.findColumnInTableByName(catalog, fk.getReferencingTableName(), fk.getReferencingColumnName());
+        if (fkColumn == null) return null;
+
+        fk.setReferencedColumn(pkColumn);
+        fk.setReferencingColumn(fkColumn);
+        fkColumn.getTable().addForeignKey(fk);
+        return fk;
     }
 
 }

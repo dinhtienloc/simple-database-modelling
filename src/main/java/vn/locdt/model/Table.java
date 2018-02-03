@@ -2,6 +2,8 @@ package vn.locdt.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Created by locdt on 1/29/2018.
@@ -48,6 +50,12 @@ public class Table extends Model {
         this.columns = columns;
     }
 
+    public List<Column> getPrimaryKeys() {
+        return getColumns().stream()
+                .filter(col -> col.isPrimaryKey())
+                .collect(Collectors.toList());
+    }
+
     public List<ForeignKey> getForeignKeys() {
         return foreignKeys;
     }
@@ -62,5 +70,17 @@ public class Table extends Model {
 
     public void addForeignKey(ForeignKey fk) {
         if (fk != null) this.foreignKeys.add(fk);
+    }
+
+    @Override
+    public String toString() {
+        return "Table{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", catalog=" + catalog.getName() +
+                ", schema=" + schema +
+                ", columnsSize=" + columns.size() +
+                ", foreignKeys=" + foreignKeys.size() +
+                '}';
     }
 }

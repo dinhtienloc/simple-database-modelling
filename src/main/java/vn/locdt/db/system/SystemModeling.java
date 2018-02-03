@@ -58,7 +58,7 @@ public abstract class SystemModeling {
 
     public abstract Column modelColumn(Table table, ResultSet column);
 
-    public abstract PrimaryKeyColumn modelPrimaryKey(Table table, ResultSet pk);
+    public abstract void modelPrimaryKey(Table table, ResultSet pk);
 
-    public abstract ForeignKey modelForeignKey(Table table, ResultSet fk);
+    public abstract ForeignKey modelForeignKey(Catalog catalog, ResultSet fk);
 }

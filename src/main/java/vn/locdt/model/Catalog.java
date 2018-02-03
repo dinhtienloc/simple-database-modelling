@@ -30,4 +30,13 @@ public class Catalog extends Model {
     public void addTable(Table t) {
         if (t != null) this.tables.add(t);
     }
+
+    @Override
+    public String toString() {
+        return "Catalog{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", tablesSize=" + tables.size() +
+                '}';
+    }
 }
