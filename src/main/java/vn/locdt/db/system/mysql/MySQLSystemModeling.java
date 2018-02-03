@@ -1,20 +1,19 @@
 package vn.locdt.db.system.mysql;
 
+import vn.locdt.db.system.ResultSetExtractor;
 import vn.locdt.db.system.SystemModeling;
 import vn.locdt.exception.SystemCatalogException;
-import vn.locdt.util.Utils;
-import vn.locdt.wrapper.DatabaseMetadataWrapper;
+import vn.locdt.DatabaseMetadataWrapper;
 import vn.locdt.exception.CatalogNotSupportException;
 import vn.locdt.exception.SchemaNotSupportException;
 import vn.locdt.model.*;
-import vn.locdt.wrapper.ResultSetWrapper;
+import vn.locdt.ResultSetIterator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Created by locdt on 1/31/2018.
@@ -27,8 +26,10 @@ public class MySQLSystemModeling extends SystemModeling {
         super();
     }
 
-    public MySQLSystemModeling(DatabaseMetadataWrapper wrapper) {
-        super(wrapper);
+    @Override
+    public SystemModeling addExtractor(ResultSetExtractor extractor) {
+        this.setExtractor(new MySQLResultSetExtractor());
+        return this;
     }
 
     @Override
@@ -62,19 +63,11 @@ public class MySQLSystemModeling extends SystemModeling {
     }
 
     @Override
-    public Catalog modelCatalog(ResultSet catalogRs) throws CatalogNotSupportException {
-        try {
-            String catalog = catalogRs.getString("TABLE_CAT");
-            Catalog newCatalog = new Catalog(catalog);
-            wrapper.setCatalog(catalog);
-
-            ResultSetWrapper.wrap(wrapper.getAllTables()).forEach(row -> modelTable(newCatalog, row));
-            return newCatalog;
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Catalog modelCatalog(ResultSet rs) throws CatalogNotSupportException {
+        wrapper.setCatalog(catalog);
+        Catalog newCatalog = extractor.catalog(rs);
+        wrapper.getAllTables().forEach(row -> modelTable(newCatalog, row));
+        return newCatalog;
     }
 
     @Override
@@ -83,52 +76,24 @@ public class MySQLSystemModeling extends SystemModeling {
     }
 
     @Override
-    public Table modelTable(Catalog catalog, ResultSet tableRs) {
-        try {
-            String tableName = tableRs.getString("TABLE_NAME ");
-            Table newTable = new Table(tableName);
-            ResultSetWrapper.wrap(wrapper.getAllColumns(tableName)).forEach(row -> modelColumn(newTable, row));
-            ResultSetWrapper.wrap(wrapper.getPrimaryKeys(tableName)).forEach(row -> modelPrimaryKey(newTable, row));
-            ResultSetWrapper.wrap(wrapper.getForeignKeys(tableName)).forEach(row -> modelForeignKey(newTable, row));
-            catalog.addTable(newTable);
-            newTable.setCatalog(catalog);
-            return newTable;
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public Table modelTable(Catalog catalog, ResultSet rs) {
+        Table table = extractor.table(rs);
 
-        return null;
+        wrapper.getAllColumns(table.getName()).forEach(row -> modelColumn(table, row));
+        wrapper.getPrimaryKeys(table.getName()).forEach(row -> modelPrimaryKey(table, row));
+        wrapper.getForeignKeys(table.getName()).forEach(row -> modelForeignKey(table, row));
+
+        catalog.addTable(table);
+        table.setCatalog(catalog);
+        return table;
     }
 
     @Override
-    public Column modelColumn(Table table, ResultSet columnRs) {
-        try {
-            String columnName = columnRs.getString("COLUMN_NAME");
-            int dataTypeCode = columnRs.getInt("DATA_TYPE");
-            String dataType = columnRs.getString("TYPE_NAME");
-            int columnSize = columnRs.getInt("COLUMN_SIZE");
-            boolean nullable = columnRs.getBoolean("NULLABLE");
-            boolean autoIncremented = "YES".equals(columnRs.getString("IS_AUTOINCREMENT")) ? true : false;
-            boolean generated = "YES".equals(columnRs.getString("IS_GENERATEDCOLUMN")) ? true : false; ;
-
-            Column newColumn = new Column(columnName);
-            newColumn.setDataTypeCode(dataTypeCode);
-            newColumn.setDataType(dataType);
-            newColumn.setSize(columnSize);
-            newColumn.setNullable(nullable);
-            newColumn.setAutoIncrement(autoIncremented);
-            newColumn.setGenerated(generated);
-
-            newColumn.setTable(table);
-            table.addColumn(newColumn);
-
-            return newColumn;
-        }
-        catch (SQLException e) {
-
-        }
-        return null;
+    public Column modelColumn(Table table, ResultSet rs) {
+        Column newColumn = extractor.column(rs);
+        newColumn.setTable(table);
+        table.addColumn(newColumn);
+        return newColumn;
     }
 
     @Override

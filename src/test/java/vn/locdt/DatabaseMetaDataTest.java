@@ -2,9 +2,7 @@ package vn.locdt;
 
 import org.junit.Test;
 import vn.locdt.modeling.ModelingTestCase;
-import vn.locdt.wrapper.ResultSetWrapper;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -25,7 +23,7 @@ public class DatabaseMetaDataTest extends ModelingTestCase {
 //            System.out.println(rs.getString("TABLE_CAT"));
 //        }
 
-        ResultSetWrapper.wrap(wrapper.getAllColumns("actor")).forEach(row -> {
+        wrapper.getAllColumns("actor").forEach(row -> {
             try {
                 System.out.println(row.getString("TYPE_NAME"));
             }

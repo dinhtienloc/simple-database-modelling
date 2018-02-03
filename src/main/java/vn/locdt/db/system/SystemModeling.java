@@ -1,12 +1,11 @@
 package vn.locdt.db.system;
 
-import vn.locdt.wrapper.DatabaseMetadataWrapper;
+import vn.locdt.DatabaseMetadataWrapper;
 import vn.locdt.exception.CatalogNotSupportException;
 import vn.locdt.exception.SchemaNotSupportException;
 import vn.locdt.model.*;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -14,6 +13,7 @@ import java.util.List;
  */
 public abstract class SystemModeling {
     protected DatabaseMetadataWrapper wrapper;
+    protected ResultSetExtractor extractor;
     protected String catalog;
 
     public SystemModeling() {}
@@ -30,6 +30,14 @@ public abstract class SystemModeling {
         this.wrapper = wrapper;
     }
 
+    public ResultSetExtractor getExtractor() {
+        return extractor;
+    }
+
+    public void setExtractor(ResultSetExtractor extractor) {
+        this.extractor = extractor;
+    }
+
     public String getCatalog() {
         return catalog;
     }
@@ -37,6 +45,8 @@ public abstract class SystemModeling {
     public void setCatalog(String catalog) {
         this.catalog = catalog;
     }
+
+    public abstract SystemModeling addExtractor(ResultSetExtractor extractor);
 
     public abstract List<Catalog> model();
 

@@ -1,7 +1,7 @@
 package vn.locdt.modeling;
 
 import junit.framework.TestCase;
-import vn.locdt.wrapper.DatabaseMetadataWrapper;
+import vn.locdt.DatabaseMetadataWrapper;
 import vn.locdt.TestConstants;
 
 import java.sql.Connection;
